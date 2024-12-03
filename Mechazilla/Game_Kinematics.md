@@ -7,7 +7,9 @@ This game will have two main sprintes, a set of mechazilla arms(just like the on
 But before anything, let's have **Axis Reference**:
 - X-axis is along the horizontal(right positive).
 - Y-axis is along the vertial(upwards positive).
-- Origin is in the middle of the screen.
+- Origin in calculations is the center of the screen.
+- But ( $X,Y$ ) have to mapped on pixels:
+  - Pixelwise origin(0,0) is top left of the screen.
 
 Dynamics equations for each parameter(each parameter HAVE to be updated, write logic for each!)
 
@@ -27,6 +29,7 @@ Here:
 - $\theta_V$ will be the orientation of the thrust vector w.r.t rocket's body.
 
 There have to be some very important variables defined internally, namely:
+- $g =$ Earth's gravitational acceleration
 - $H =$ Height of the booster
 - $H_s =$ Height of the screen
 - $W_s =$ Width of the screen
@@ -92,7 +95,9 @@ Winning and loosing conditions will be checked at the end of every loop iteratio
 - If the point $(X,Y)$ is within a certain range.
 
 ### Loosing Condition checks:
-- If $\omega, V_x, V_y$ is not within those limits and (Y-H) came within 
+- If $\omega, V_x, V_y$ is not within those limits 
+&& 
+- (Y - H) came within
 
 
 
