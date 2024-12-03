@@ -30,7 +30,7 @@
 #---------------------------------------------------------------------------------------------------------------------
 TARGET      	:=  $(notdir $(CURDIR))
 BUILD       	:=  build
-LIBBUTANO   	:=  ../butano
+LIBBUTANO   	:=  C:/Users/shaxi/Desktop/Github\ Projects/GBA_Final/butano
 PYTHON      	:=  python
 SOURCES     	:=  src /src
 INCLUDES    	:=  include /include
@@ -54,9 +54,7 @@ EXTTOOL     	:=
 #---------------------------------------------------------------------------------------------------------------------
 # Export absolute butano path:
 #---------------------------------------------------------------------------------------------------------------------
-ifndef LIBBUTANOABS
-	export LIBBUTANOABS	:=	$(realpath $(LIBBUTANO))
-endif
+LIBBUTANOABS := C:/Users/shaxi/Desktop/Github\ Projects/GBA_Final/butano
 
 #---------------------------------------------------------------------------------------------------------------------
 # Include main makefile:
