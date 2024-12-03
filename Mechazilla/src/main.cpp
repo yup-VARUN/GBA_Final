@@ -1,56 +1,105 @@
+// #include <butano/butano.h>
 #include "vector"
 #include "bn_core.h"
 #include "bn_sprite_ptr.h"
 #include "bn_math.h"
 #include "bn_fixed.h"
 #include "bn_sprite_items_mechazilla.h" // Include your sprite assets here
+#include "bn_display.h"
+#include "bn_sprite_builder.h"
+#include "bn_keypad.h"
+
 // #include "bn_sound_items_explosion.h"
 // #include "bn_sound_items_flame.h"
+
+constexpr int SCREEN_WIDTH = 240;
+constexpr int SCREEN_HEIGHT = 160;
+constexpr float vy = 2;
+constexpr float vx = 0;
 
 class Booster
 {
 private:
-    bn::fixed x, y;          // Position
-    bn::fixed vx, vy;        // Velocity
-    bn::fixed ax, ay;        // Acceleration
-    bn::fixed theta_r;       // Orientation of the rocket
-    bn::fixed omega_r;       // Angular velocity
-    bn::fixed alpha_r;       // Angular acceleration
-    bn::fixed theta_v;       // Thrust vector angle relative to the rocket
-    const bn::fixed mass;    // Mass of the booster
-    const bn::fixed inertia; // Moment of inertia
-    const bn::fixed height;  // Height of the booster
+    bn::fixed dt = 0.1;         // Discrete Timestep Length
+    ////// ROCKET: /////////
+    bn::fixed xr, yr;           // Position
+    bn::fixed vx, vy;           // Velocity
+    bn::fixed ax, ay;           // Acceleration
+    bn::fixed theta_r;          // Orientation
+    bn::fixed omega_r;          // Angular velocity
+    bn::fixed alpha_r;          // Angular acceleration
+    
+    /////// FLAME: /////////
+    bn::fixed xf, yf;           //Position
+
+    bn::fixed theta_v = 0.0f;   // Thrust vector angle relative to the rocket
+    bn::fixed theta_t = 0.0f;   // Absolute Angle of the thrust(wrt x-axis)
+    const bn::fixed mass;       // Mass of the booster
+    const bn::fixed inertia;    // Moment of inertia
+    const bn::fixed height;     // Height of the booster
+    const bn::fixed g = 0.2;    // Gravitational Acceleration from earth
 
 public:
     Booster(bn::fixed initial_x, bn::fixed initial_y, bn::fixed booster_mass, bn::fixed booster_inertia, bn::fixed booster_height)
         : x(initial_x), y(initial_y), vx(0), vy(0), ax(0), ay(0), theta_r(0), omega_r(0), alpha_r(0), theta_v(0),
-          mass(booster_mass), inertia(booster_inertia), height(booster_height)
+          mass(booster_mass), inertia(booster_inertia), height(booster_height), g(0.2)
     {
     }
 
-    void apply_thrust(bn::fixed thrust, bn::fixed theta_v_input)
+    void init()
     {
-        theta_v = theta_v_input;
-        bn::fixed theta_t = theta_r - theta_v;
-
-        ax = (thrust * bn::sin(theta_t)) / mass;
-        ay = (thrust * bn::cos(theta_t)) / mass;
-
-        bn::fixed torque = (height / 2) * thrust * bn::sin(theta_t);
-        alpha_r = torque / inertia;
+        ///////////////////// Initializing all the sprites ////////////////////
+        bn::sprite_ptr rocket = bn::sprite_items::rocket.create_sprite(x, y);
+        bn::sprite_ptr flame = bn::sprite_items::flame_sprite.create_sprite(x, y + height/2);
+        rocket.set_position(x, y);
+        flame.set_position(x, y + height/2);
     }
 
-    void update(bn::fixed dt)
-    {
-        // Update translational parameters
-        vx += ax * dt;
-        vy += ay * dt;
-        x += vx * dt;
-        y += vy * dt;
+    void update(bn::fixed thrust)
+    {        
+        //////// ROCKET: ////////
+
+        // Button presses to control the theta_v:
+        if (!bn::input::left_pressed() && !bn::input::right_pressed()) {
+            // No buttons pressed, set theta_v to 0 degrees
+            theta_v = 0.0f;
+        } else if (bn::input::left_pressed()) {
+            // Left button pressed, set theta_v to -15 degrees
+            theta_v = -15.0f * bn::pi / 180.0f;
+        } else if (bn::input::right_pressed()) {
+            // Right button pressed, set theta_v to 15 degrees
+            theta_v = 15.0f * bn::pi / 180.0f;
+        }
+
+        theta_t = theta_r - theta_v;
 
         // Update rotational parameters
+        bn::fixed torque = (height / 2) * thrust * bn::sin(theta_t);
+        alpha_r = torque / inertia;
+        
         omega_r += alpha_r * dt;
         theta_r += omega_r * dt;
+
+        // Update translational parameters
+        // 1. Acceleration:
+        ax = (thrust * bn::sin(theta_t)) / mass;
+        ay = (thrust * bn::cos(theta_t)) / mass;
+        // 2. Velocities:
+        vx += ax * dt;
+        vy += (ay - g) * dt;
+        // 3. positions:
+        xr += vx * dt;
+        yr += vy * dt;
+
+        //////// FLAME: ///////
+        xf = xr + height * bn::cos(theta_r);
+        yf = yr + height * bn::sin(theta_r);
+
+        /////////////// UPDATING SPRITES ///////////////
+        rocket.set_position(xr, yr);
+        rocket.set_rotation(theta_r);
+        flame.set_position(xf, yf);
+        flame.set_rotation(theta_t);
     }
 
     bool is_landed(bn::fixed screen_width, bn::fixed screen_height)
@@ -72,50 +121,29 @@ public:
     bn::fixed get_theta_r() const { return theta_r; }
 };
 
+
+
 int main()
 {
-    bn::core::init();
+    bn::core::init(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    // Screen dimensions
-    const bn::fixed screen_width = 240;
-    const bn::fixed screen_height = 160;
+    // // Create a text generator
+    // bn::text_generator text_generator(4, 4);
 
-    // Booster initialization
-    Booster booster(screen_width / 2, 20, 100, 50, 20);
-    bn::sprite_ptr booster_sprite = bn::sprite_items::mechazilla.create_sprite(booster.get_x(), booster.get_y());
+    // // Set the text properties
+    // text_generator.set_font(bn::font_actions::load_font_actions("font"));
+    // text_generator.set_center_alignment();
+    // text_generator.set_bg_color(bn::color::white);
+    // text_generator.set_fg_color(bn::color::black);
 
-    // Simulation parameters
-    const bn::fixed dt = 0.1;
-    // std::vector<bn::fixed, 100> thrust_curve = {5, 5, 5, 0, 0}; // Example thrust values
-    std::vector<bn::fixed> thrust_curve = {5, 5, 5, 0, 0}; // Dynamically sized vector
-
-    int thrust_index = 0;
-
-    // Game loop
-    while (true)
+    // // Display a text heading
+    // text_generator.generate(120, 20, "Rocket Landing Game");
+ 
+    Booster booster(10, 10, 10, 10, 10);
+    booster.init();
+    while(true)
     {
-        if (thrust_index < thrust_curve.size())
-        {
-            booster.apply_thrust(thrust_curve[thrust_index], 0); // Assuming no thrust vectoring
-            thrust_index++;
-        }
-
-        booster.update(dt);
-
-        booster_sprite.set_position(booster.get_x(), booster.get_y());
-        booster_sprite.set_rotation_angle(booster.get_theta_r());
-
-        if (booster.is_landed(screen_width, screen_height))
-        {
-            // bn::sound_items::flame.play();
-            break; // Winning condition
-        }
-        else if (booster.is_crashed(screen_width, screen_height))
-        {
-            // bn::sound_items::explosion.play();
-            break; // Losing condition
-        }
-
+        booster.update();
         bn::core::update();
     }
 

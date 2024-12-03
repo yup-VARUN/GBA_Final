@@ -44,7 +44,19 @@ main.o: \
  /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_tile.h \
  /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_compression_type.h \
  /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_palette_item.h \
- /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_color.h
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_color.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_display.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_size.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/../hw/include/bn_hw_display_constants.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_common.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_builder.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_camera_ptr.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_item.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_tiles_ptr.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_palette_ptr.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_affine_mat_ptr.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_double_size_mode.h \
+ /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_keypad.h
 /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_core.h:
 /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_span.h:
 /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_array.h:
@@ -90,3 +102,15 @@ main.o: \
 /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_compression_type.h:
 /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_palette_item.h:
 /Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_color.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_display.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_size.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/../hw/include/bn_hw_display_constants.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_common.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_builder.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_camera_ptr.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_item.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_tiles_ptr.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_palette_ptr.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_affine_mat_ptr.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_sprite_double_size_mode.h:
+/Users/varunahlawat/Work/comp_org/Final_Project/GBA_Final/butano/include/bn_keypad.h:

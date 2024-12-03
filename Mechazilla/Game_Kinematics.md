@@ -77,7 +77,9 @@ There have to be some very important variables defined internally, namely:
 - $\theta_R = \theta_R + \alpha_R * dt$
 
 
-  
+#### Flame's Position:
+- $X_f = X_r + H * cos(\theta_r)$
+- $Y_f = Y_r + H * sin(\theta_r)$
 
 
 
