@@ -2,7 +2,7 @@
 This is the Final Project repository for the Computer Organization Course @GSU
 Professor - Jean Guo
 
-This game is more than just for the grades though. It includes numerical state vector updation just like you would do in a real Falcon 9 like rocket.
+This game is a replication of mechazilla.io
 
 # Game Context Story:
 You are a Niel Marstrong, your vehicle is about to land on Mars and the section of memory that had the tunable control paramters for landing seem to have been affected by high energy cosmic particles that comes form outer space in events like black hole merger, supernove, black hole jets, pulsars' jet. 
