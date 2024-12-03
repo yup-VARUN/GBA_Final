@@ -135,6 +135,9 @@ int main()
 #include "bn_regular_bg_items_stage3.h"
 #include "bn_keypad.h"
 #include "bn_sprite_items_rocket.h"
+#include "bn_optional.h"
+#include "bn_random.h"
+#include "bn_regular_bg_items_goodintro.h"
 
 const int FRAME_LIMIT = 60;
 
@@ -147,18 +150,21 @@ enum class GameStage {
 class Booster
 {
 private:
-    bn::fixed x, y;          // Position
-    bn::fixed vx, vy;        // Velocity
-    bn::fixed ax, ay;        // Acceleration
-    bn::fixed theta_r;       // Orientation of the rocket
-    bn::fixed omega_r;       // Angular velocity
-    bn::fixed alpha_r;       // Angular acceleration
-    bn::fixed theta_v;       // Thrust vector angle relative to the rocket
-    bn::fixed mass;          // Mass of the booster
-    bn::fixed inertia;       // Moment of inertia
-    bn::fixed height;        // Height of the booster
-    static constexpr bn::fixed GRAVITY = 0.1;   // Reduced gravity
-    static constexpr bn::fixed MOVE_SPEED = 1.5; // Increased move speed
+    bn::fixed x, y;          
+    bn::fixed vx, vy;        
+    bn::fixed ax, ay;        
+    bn::fixed theta_r;       
+    bn::fixed omega_r;       
+    bn::fixed alpha_r;       
+    bn::fixed theta_v;       
+    bn::fixed mass;          
+    bn::fixed inertia;       
+    bn::fixed height;        
+    static constexpr bn::fixed GRAVITY = 0.5;   
+    static constexpr bn::fixed MOVE_SPEED = 3;
+    static constexpr bn::fixed WIND_FORCE = 0.08;  // Increased wind force
+    static constexpr bn::fixed TURBULENCE = 0.1;  // Increased turbulence
+    bn::random random;
 
 public:
     Booster(bn::fixed initial_x, bn::fixed initial_y, bn::fixed booster_mass, bn::fixed booster_inertia, bn::fixed booster_height)
@@ -210,57 +216,178 @@ public:
     bn::fixed get_x() const { return x; }
     bn::fixed get_y() const { return y; }
     bn::fixed get_theta_r() const { return theta_r; }
+
+    void apply_wind(bool direction)
+    {
+        if(direction)
+        {
+            vx += WIND_FORCE * 2;  // Stronger push right
+        }
+        else
+        {
+            vx -= WIND_FORCE * 2;  // Stronger push left
+        }
+    }
+
+    void apply_turbulence()
+    {
+        // Only affect horizontal movement with stronger effect
+        vx += (random.get() % 200 - 100) * TURBULENCE / 100;  // Increased range and strength
+    }
 };
 
 int main()
 {
     bn::core::init();
 
-    // Initialize with stage1
+    // Initialize intro background with goodintro
+    bn::optional<bn::regular_bg_ptr> intro_bg = bn::regular_bg_items::goodintro.create_bg(0, 0);
+
+    // Wait for A button press to start game
+    while(!bn::keypad::a_pressed())
+    {
+        bn::core::update();
+    }
+
+    // Clear intro screen
+    intro_bg.reset();
+
+    // Initialize stage1 background after intro
     GameStage current_stage = GameStage::STAGE1;
-    bn::regular_bg_ptr current_bg = bn::regular_bg_items::stage1.create_bg(0, 0);
+    bn::optional<bn::regular_bg_ptr> bg1 = bn::regular_bg_items::stage1.create_bg(0, 0);
+    bn::optional<bn::regular_bg_ptr> bg2;
+    bn::optional<bn::regular_bg_ptr> bg3;
 
     // Screen dimensions (GBA screen is 240x160)
     const bn::fixed screen_width = 240;
     const bn::fixed screen_height = 160;
-    const bn::fixed sprite_width = 32;  // Increased for better visibility
+    const bn::fixed sprite_width = 32;
 
-    // Start position: center of screen horizontally, above the screen vertically
-    const bn::fixed start_x = 120;      // Exactly center horizontally
-    const bn::fixed start_y = -32;      // Start above screen
+    // Start position: center horizontally (0), top of screen (-80)
+    const bn::fixed start_x = 0;
+    const bn::fixed start_y = -80;
+
+    // Initialize random number generator
+    bn::random random;
 
     // Booster initialization
     Booster booster(start_x, start_y, 100, 50, 20);
     bn::sprite_ptr booster_sprite = bn::sprite_items::rocket.create_sprite(start_x, start_y);
-    
-    // Set initial rotation (0 for pointing downward)
     booster_sprite.set_rotation_angle(0);
+
+    // Create Mechazilla sprite with initial random position
+    bn::fixed mechazilla_x = (random.get() % 160) - 80;
+    bn::sprite_ptr mechazilla_sprite = bn::sprite_items::mechazilla.create_sprite(mechazilla_x, 48);
+
+    // Add wind direction toggle with faster changes
+    bool wind_right = true;
+    int wind_counter = 0;
+    const int WIND_CHANGE_RATE = 30;
 
     while (true)
     {
-        // Handle rocket movement
-        if(bn::keypad::left_held() && booster.get_x() > 8)
+        // Handle rocket movement based on current stage
+        switch(current_stage)
         {
-            booster.move_left();
-        }
-        else if(bn::keypad::right_held() && booster.get_x() < screen_width - 8)
-        {
-            booster.move_right();
-        }
-        else
-        {
-            booster.stop_horizontal();
+            case GameStage::STAGE1:
+                // Basic movement
+                if(bn::keypad::left_held() && booster.get_x() > -120)
+                {
+                    booster.move_left();
+                }
+                else if(bn::keypad::right_held() && booster.get_x() < 120)
+                {
+                    booster.move_right();
+                }
+                else
+                {
+                    booster.stop_horizontal();
+                }
+                break;
+
+            case GameStage::STAGE2:
+                // Stage 2: Stronger wind effect
+                if(bn::keypad::left_held() && booster.get_x() > -120)
+                {
+                    booster.move_left();
+                }
+                else if(bn::keypad::right_held() && booster.get_x() < 120)
+                {
+                    booster.move_right();
+                }
+                else
+                {
+                    booster.stop_horizontal();
+                }
+                
+                // More frequent wind changes
+                wind_counter++;
+                if(wind_counter >= WIND_CHANGE_RATE)
+                {
+                    wind_counter = 0;
+                    wind_right = !wind_right;
+                }
+                booster.apply_wind(wind_right);
+                break;
+
+            case GameStage::STAGE3:
+                // Stage 3: Wind and strong horizontal turbulence
+                if(bn::keypad::left_held() && booster.get_x() > -120)
+                {
+                    booster.move_left();
+                }
+                else if(bn::keypad::right_held() && booster.get_x() < 120)
+                {
+                    booster.move_right();
+                }
+                else
+                {
+                    booster.stop_horizontal();
+                }
+                
+                booster.apply_wind(wind_right);
+                booster.apply_turbulence();  // Now only affects horizontal movement
+                break;
         }
 
         // Update rocket physics
         booster.update(0.1);
-
-        // Update sprite position
         booster_sprite.set_position(booster.get_x(), booster.get_y());
         booster_sprite.set_rotation_angle(booster.get_theta_r());
 
-        // Reset position if rocket goes off screen bottom
-        if(booster.get_y() > screen_height + sprite_width)
+        // Check for collision between rocket and current Mechazilla position
+        if(abs(booster.get_x() - mechazilla_sprite.x()) < 16 && abs(booster.get_y() - 48) < 16)
+        {
+            // Collision detected! Move to next stage
+            switch(current_stage)
+            {
+                case GameStage::STAGE1:
+                    bg1.reset();
+                    bg2 = bn::regular_bg_items::stage2.create_bg(0, 0);
+                    current_stage = GameStage::STAGE2;
+                    mechazilla_x = (random.get() % 160) - 80;
+                    mechazilla_sprite.set_x(mechazilla_x);
+                    booster.reset_position(start_x, start_y);
+                    break;
+                    
+                case GameStage::STAGE2:
+                    bg2.reset();
+                    bg3 = bn::regular_bg_items::stage3.create_bg(0, 0);
+                    current_stage = GameStage::STAGE3;
+                    mechazilla_x = (random.get() % 160) - 80;
+                    mechazilla_sprite.set_x(mechazilla_x);
+                    booster.reset_position(start_x, start_y);
+                    break;
+                    
+                case GameStage::STAGE3:
+                    // Freeze the final scene
+                    while(true)
+                    {
+                        bn::core::update();  // Keep updating the screen
+                    }
+            }
+        }
+        else if(booster.get_y() > 80)
         {
             booster.reset_position(start_x, start_y);
         }
